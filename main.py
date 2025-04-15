@@ -56,7 +56,7 @@ def check_new_projects():
         send_telegram_message(message)
         write_projects_to_csv(new_open + new_upcoming)
     else:
-        send_telegram_message("✅ אין פרויקטים חדשים היום.")
+        send_telegram_message("✅ אין פרויקטי מחיר למשתכן חדשים היום.")
 
     save_state(current_state)
 
