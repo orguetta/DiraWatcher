@@ -1,5 +1,8 @@
 name: Check Dira Projects
 
+permissions:
+  contents: write
+
 on:
   schedule:
     - cron: '0 6 * * *'
@@ -21,3 +24,11 @@ jobs:
 
       - name: Run Dira check script
         run: uv run main.py
+      
+      - name: Commit changes
+        run: |
+           git config user.name "github-actions"
+           git config user.email "github-actions@github.com"
+           git add new_projects.csv
+           git diff --cached --quiet || git commit -m "📥 Update new_projects.csv from daily run"
+           git push

@@ -1,19 +1,20 @@
 import requests
 import json
-from pathlib import Path
 from urllib.parse import quote
+from pathlib import Path
+from telegram import send_telegram_message
+from csv_writer import write_projects_to_csv
 
 BASE_URL = "https://www.dira.moch.gov.il/api/Invoker"
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json, text/plain, */*",
+    "Accept": "application/json",
     "Referer": "https://www.dira.moch.gov.il/ProjectsList"
 }
 
 STATE_PATH = Path("state.json")
 
 def fetch_projects(status: int) -> list[dict]:
-    """Fetch projects by ProjectStatus (2=upcoming, 4=open)"""
     raw_param = f"?ProjectStatus={status}&Entitlement=1&PageNumber=1&PageSize=50&IsInit=false"
     encoded_param = quote(raw_param, safe="")
     url = f"{BASE_URL}?method=Projects&param={encoded_param}"
@@ -46,16 +47,16 @@ def check_new_projects():
     new_open = [p for p in current_open if str(p["ProjectNumber"]) not in previous_state["open"]]
     new_upcoming = [p for p in current_upcoming if str(p["ProjectNumber"]) not in previous_state["upcoming"]]
 
-    if new_open:
-        print("🔔 New projects open for registration:")
+    if new_open or new_upcoming:
+        message = "🆕 *פרויקטים חדשים:*\n"
         for p in new_open:
-            print(f"- {p['ProjectName']} | {p['CityDescription']} | #{p['ProjectNumber']}")
-    if new_upcoming:
-        print("🔔 New upcoming projects (not open yet):")
+            message += f"🏠 *{p['ProjectName']}* ({p['CityDescription']}) – פתוח\n"
         for p in new_upcoming:
-            print(f"- {p['ProjectName']} | {p['CityDescription']} | #{p['ProjectNumber']}")
-    if not new_open and not new_upcoming:
-        print("✅ No new projects.")
+            message += f"📅 *{p['ProjectName']}* ({p['CityDescription']}) – טרם נפתח\n"
+        send_telegram_message(message)
+        write_projects_to_csv(new_open + new_upcoming)
+    else:
+        send_telegram_message("✅ אין פרויקטים חדשים היום.")
 
     save_state(current_state)
 
