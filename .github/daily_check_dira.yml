@@ -1,0 +1,23 @@
+name: Check Dira Projects
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-projects:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies using uv
+        run: uv sync
+
+      - name: Run Dira check script
+        run: uv run main.py
