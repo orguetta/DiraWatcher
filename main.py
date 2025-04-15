@@ -2,7 +2,7 @@ import requests
 import json
 from urllib.parse import quote
 from pathlib import Path
-from telegram import send_telegram_message
+from telegram import send_telegram, CHANNEL_ID, PERSONAL_ID
 from csv_writer import write_projects_to_csv
 
 BASE_URL = "https://www.dira.moch.gov.il/api/Invoker"
@@ -53,10 +53,11 @@ def check_new_projects():
             message += f"🏠 *{p['ProjectName']}* ({p['CityDescription']}) – פתוח\n"
         for p in new_upcoming:
             message += f"📅 *{p['ProjectName']}* ({p['CityDescription']}) – טרם נפתח\n"
-        send_telegram_message(message)
+        send_telegram(CHANNEL_ID, message)
+        send_telegram(PERSONAL_ID, "📣 נשלחה הודעה לקבוצה – יש פרויקטים חדשים.")
         write_projects_to_csv(new_open + new_upcoming)
     else:
-        send_telegram_message("✅ אין פרויקטי מחיר למשתכן חדשים היום.")
+        send_telegram(PERSONAL_ID, "✅ אין פרויקטים חדשים היום. הסקריפט רץ כרגיל.")
 
     save_state(current_state)
 
