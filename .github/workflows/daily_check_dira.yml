@@ -3,6 +3,10 @@ name: Check Dira Projects
 permissions:
   contents: write
 
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
 on:
   schedule:
     - cron: '0 6 * * *'
@@ -23,6 +27,9 @@ jobs:
         run: uv sync
 
       - name: Run Dira check script
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: uv run main.py
       
       - name: Commit and push CSV if changed
