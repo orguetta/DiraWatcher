@@ -40,8 +40,8 @@ jobs:
           if [ -f new_projects.csv ]; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
-            git add new_projects.csv
-            git diff --cached --quiet || git commit -m "📥 Update new_projects.csv from daily run"
+            git add new_projects.csv stats.json
+            git diff --cached --quiet || git commit -m "📥 Update new_projects.csv from daily run and save initial state"
             git pull --rebase
             git push
           else
