@@ -8,10 +8,7 @@ PERSONAL_ID = os.environ.get("TELEGRAM_PERSONAL_ID")
 
 MAX_LENGTH = 4096
 
-def escape_markdown(text: str) -> str:
-    """
-    Escapes Telegram MarkdownV2 reserved characters.
-    """
+def escape_markdown_v2(text: str) -> str:
     escape_chars = r"_*[]()~`>#+-=|{}.!\\"
     return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
 
@@ -23,9 +20,9 @@ def send_telegram(to: str, text: str, markdown: bool = False):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
     if markdown:
-        text = escape_markdown(text)
+        text = escape_markdown_v2(text)
 
-    chunks = [text[i:i+MAX_LENGTH] for i in range(0, len(text), MAX_LENGTH)]
+    chunks = [text[i:i + MAX_LENGTH] for i in range(0, len(text), MAX_LENGTH)]
 
     for chunk in chunks:
         payload = {
@@ -42,4 +39,5 @@ def send_telegram(to: str, text: str, markdown: bool = False):
             print(f"[OK] Telegram sent to {to} ({len(chunk)} chars)")
         except Exception as e:
             print(f"[ERROR] Telegram failed: {e}")
-            print(f"[DEBUG] Response: {res.status_code} – {res.text}")
+            if res is not None:
+                print(f"[DEBUG] Response: {res.status_code} – {res.text}")
