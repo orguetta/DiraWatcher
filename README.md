@@ -1,6 +1,10 @@
 
 # 📦 Dira Watcher – ניטור פרויקטים חדשים באתר דירה בהנחה
 
+![GitHub Workflow Status](https://github.com/orguetta/Dira/actions/workflows/check-dira.yml/badge.svg)
+
+[![Join the Telegram Channel](https://img.shields.io/badge/Telegram-Join%20Channel-blue?logo=telegram)](https://t.me/dira_beanha)
+
 מערכת ב־Python שבודקת מדי יום אם נוספו פרויקטים חדשים באתר [דירה בהנחה](https://www.dira.moch.gov.il/ProjectsList), שולחת עדכון לטלגרם, ושומרת את המידע ל־CSV לצורך תיעוד.
 
 ## ✨ פיצ'רים
