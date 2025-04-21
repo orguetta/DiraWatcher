@@ -37,13 +37,14 @@ jobs:
       
       - name: Commit and push CSV if changed
         run: |
-          if [ -f new_projects.csv ]; then
-            git config user.name "github-actions"
-            git config user.email "github-actions@github.com"
-            git add new_projects.csv stats.json
-            git diff --cached --quiet || git commit -m "📥 Update new_projects.csv from daily run and save initial state"
-            git pull --rebase
-            git push
+          if [ -f new_projects.csv ] || [ -f state.json ]; then
+                git config user.name "github-actions"
+              git config user.email "github-actions@github.com"
+              [ -f new_projects.csv ] && git add new_projects.csv
+              [ -f state.json ] && git add state.json
+              git diff --cached --quiet || git commit -m "🔄 Update tracked files from daily run"
+              git pull --rebase
+              git push
           else
-            echo "🟡 Skipping commit – new_projects.csv does not exist"
+              echo "🟡 No files to commit"
           fi
