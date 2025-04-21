@@ -42,6 +42,7 @@ jobs:
             git config user.email "github-actions@github.com"
             git add new_projects.csv
             git diff --cached --quiet || git commit -m "📥 Update new_projects.csv from daily run"
+            git pull --rebase
             git push
           else
             echo "🟡 Skipping commit – new_projects.csv does not exist"
