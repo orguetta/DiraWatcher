@@ -55,7 +55,6 @@ uv run scripts/check_dira.py
 - הקובץ `state.json` נשמר בגיט כדי לשמר מצב בין הרצות (מומלץ לעדכן אותו עם כל commit אוטומטי).
 - הקובץ `new_projects.csv` מתעדכן רק כאשר נמצאו פרויקטים חדשים.
 - כל הודעה שעוברת את 4096 תווים תיחתך אוטומטית ונשלח במספר הודעות.
-"""
+- אם יש צורך להפסיק את ההודעות האישיות, ניתן להגדיר את `TELEGRAM_PERSONAL_ID` ל־`None`.
+- אם יש צורך להפסיק את ההודעות לקבוצת טלגרם, ניתן להגדיר את `TELEGRAM_CHANNEL_ID` ל־`None`.
 
-Path("README.md").write_text(readme.strip(), encoding="utf-8")
-"✅ README.md נוצר בהצלחה!"
