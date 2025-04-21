@@ -30,9 +30,11 @@ def send_telegram(to: str, text: str, markdown: bool = False):
     for chunk in chunks:
         payload = {
             "chat_id": to,
-            "text": chunk,
-            "parse_mode": "MarkdownV2" if markdown else None
+            "text": chunk
         }
+
+        if markdown:
+            payload["parse_mode"] = "MarkdownV2"
 
         try:
             res = requests.post(url, json=payload)
