@@ -15,12 +15,26 @@ HEADERS = {
 STATE_PATH = Path("state.json")
 
 def fetch_projects(status: int) -> list[dict]:
-    raw_param = f"?ProjectStatus={status}&Entitlement=1&PageNumber=1&PageSize=50&IsInit=false"
-    encoded_param = quote(raw_param, safe="")
-    url = f"{BASE_URL}?method=Projects&param={encoded_param}"
-    res = requests.get(url, headers=HEADERS)
-    res.raise_for_status()
-    return res.json().get("ProjectItems", [])
+    """Fetch all project pages for given status (2=upcoming, 4=open)"""
+    all_projects = []
+    page = 1
+
+    while True:
+        raw_param = f"?ProjectStatus={status}&Entitlement=1&PageNumber={page}&PageSize=50&IsInit=false"
+        encoded_param = quote(raw_param, safe="")
+        url = f"{BASE_URL}?method=Projects&param={encoded_param}"
+
+        res = requests.get(url, headers=HEADERS)
+        res.raise_for_status()
+        page_data = res.json().get("ProjectItems", [])
+
+        if not page_data:
+            break
+
+        all_projects.extend(page_data)
+        page += 1
+
+    return all_projects
 
 def load_state() -> dict:
     if STATE_PATH.exists():
@@ -47,12 +61,18 @@ def check_new_projects():
     new_open = [p for p in current_open if str(p["ProjectNumber"]) not in previous_state["open"]]
     new_upcoming = [p for p in current_upcoming if str(p["ProjectNumber"]) not in previous_state["upcoming"]]
 
+    for p in new_open:
+        p["ProjectStatus"] = 4
+    for p in new_upcoming:
+        p["ProjectStatus"] = 2
+
     if new_open or new_upcoming:
         message = "🆕 *פרויקטים חדשים:*\n"
         for p in new_open:
             message += f"🏠 *{p['ProjectName']}* ({p['CityDescription']}) – פתוח\n"
         for p in new_upcoming:
             message += f"📅 *{p['ProjectName']}* ({p['CityDescription']}) – טרם נפתח\n"
+
         send_telegram(CHANNEL_ID, message)
         send_telegram(PERSONAL_ID, "📣 נשלחה הודעה לקבוצה – יש פרויקטים חדשים.")
         write_projects_to_csv(new_open + new_upcoming)
