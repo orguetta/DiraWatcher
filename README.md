@@ -62,3 +62,4 @@ uv run scripts/check_dira.py
 - אם יש צורך להפסיק את ההודעות האישיות, ניתן להגדיר את `TELEGRAM_PERSONAL_ID` ל־`None`.
 - אם יש צורך להפסיק את ההודעות לקבוצת טלגרם, ניתן להגדיר את `TELEGRAM_CHANNEL_ID` ל־`None`.
 
+
