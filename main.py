@@ -1,4 +1,6 @@
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import json
 from urllib.parse import quote
 from pathlib import Path
@@ -13,8 +15,27 @@ HEADERS = {
 }
 
 STATE_PATH = Path("state.json")
+REQUEST_TIMEOUT = (10, 30)
 
-def fetch_projects(status: int) -> list[dict]:
+
+def build_session() -> requests.Session:
+    """Create an HTTP session that retries transient API failures."""
+    retry = Retry(
+        total=4,
+        connect=4,
+        read=4,
+        status=4,
+        backoff_factor=1,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset({"GET"}),
+        respect_retry_after_header=True,
+    )
+    session = requests.Session()
+    session.headers.update(HEADERS)
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    return session
+
+def fetch_projects(status: int, session: requests.Session) -> list[dict]:
     """Fetch all project pages for given status (2=upcoming, 4=open)"""
     all_projects = []
     page = 1
@@ -24,7 +45,7 @@ def fetch_projects(status: int) -> list[dict]:
         encoded_param = quote(raw_param, safe="")
         url = f"{BASE_URL}?method=Projects&param={encoded_param}"
 
-        res = requests.get(url, headers=HEADERS)
+        res = session.get(url, timeout=REQUEST_TIMEOUT)
         res.raise_for_status()
         page_data = res.json().get("ProjectItems", [])
 
@@ -48,8 +69,16 @@ def extract_ids(projects: list[dict]) -> list[str]:
     return [str(p["ProjectNumber"]) for p in projects]
 
 def check_new_projects():
-    current_open = fetch_projects(4)
-    current_upcoming = fetch_projects(2)
+    session = build_session()
+    try:
+        current_open = fetch_projects(4, session)
+        current_upcoming = fetch_projects(2, session)
+    except (requests.RequestException, ValueError) as exc:
+        # Preserve state.json and the CSV when the upstream API is temporarily unavailable.
+        warning = f"⚠️ בדיקת פרויקטים נכשלה זמנית מול API משרד השיכון: {exc}"
+        print(warning)
+        send_telegram(PERSONAL_ID, warning)
+        return
 
     current_state = {
         "open": extract_ids(current_open),
